@@ -13,9 +13,17 @@ from .utils import choose_one, error_exit
 
 REGEX_SPECIAL_CHARS = r'([\.\*\+\?\|\(\)\{\}\[\]])'
 REGEX_LOG_FORMAT_VARIABLE = r'\$([a-zA-Z0-9\_]+)'
-LOG_FORMAT_COMBINED = '$remote_addr - $remote_user [$time_local] ' \
-                      '"$request" $status $body_bytes_sent ' \
-                      '"$http_referer" "$http_user_agent"'
+# LOG_FORMAT_COMBINED = '$remote_addr - $remote_user [$time_local] ' \
+#                       '"$request" $status $body_bytes_sent ' \
+#                       '"$http_referer" "$http_user_agent"'
+# # This is main log format, for web project only
+# LOG_FORMAT_COMBINED = '$remote_addr - $remote_user [$time_local] "$request" ' \
+#                       '$status $body_bytes_sent "$http_referer" ' \
+#                       '"$http_user_agent" "$http_x_forwarded_for"'
+# This is taou log format
+LOG_FORMAT_COMBINED = '$remote_addr - $remote_user [$time_local] "$request" ' \
+                      '$status $body_bytes_sent $request_time $upstream_response_time "$http_referer" ' \
+                      '"$http_user_agent" "$http_x_forwarded_for"'
 LOG_FORMAT_COMMON   = '$remote_addr - $remote_user [$time_local] ' \
                       '"$request" $status $body_bytes_sent ' \
                       '"$http_x_forwarded_for"'
