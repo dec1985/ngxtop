@@ -82,6 +82,8 @@ DEFAULT_QUERIES = [
     ('Summary:',
      '''SELECT
        count(1)                                    AS count,
+       avg(request_time)                           AS avg_request_time,
+       sum(request_time)                           AS sum_request_time,
        avg(bytes_sent)                             AS avg_bytes_sent,
        count(CASE WHEN status_type = 2 THEN 1 END) AS '2xx',
        count(CASE WHEN status_type = 3 THEN 1 END) AS '3xx',
@@ -91,10 +93,12 @@ DEFAULT_QUERIES = [
      ORDER BY %(--order-by)s DESC
      LIMIT %(--limit)s'''),
 
-    ('Detailed:',
+    ('Groupby %(--group-by)s, Order by %(--order-by)s:',
      '''SELECT
        %(--group-by)s,
        count(1)                                    AS count,
+       avg(request_time)                           AS avg_request_time,
+       sum(request_time)                           AS sum_request_time,
        avg(bytes_sent)                             AS avg_bytes_sent,
        count(CASE WHEN status_type = 2 THEN 1 END) AS '2xx',
        count(CASE WHEN status_type = 3 THEN 1 END) AS '3xx',
@@ -104,10 +108,27 @@ DEFAULT_QUERIES = [
      GROUP BY %(--group-by)s
      HAVING %(--having)s
      ORDER BY %(--order-by)s DESC
-     LIMIT %(--limit)s''')
+     LIMIT %(--limit)s'''),
+
+    ('Groupby remote_addr, Orderby count:',
+     '''SELECT
+       remote_addr,
+       count(1)                                    AS count,
+       avg(request_time)                           AS avg_request_time,
+       sum(request_time)                           AS sum_request_time,
+       avg(bytes_sent)                             AS avg_bytes_sent,
+       count(CASE WHEN status_type = 2 THEN 1 END) AS '2xx',
+       count(CASE WHEN status_type = 3 THEN 1 END) AS '3xx',
+       count(CASE WHEN status_type = 4 THEN 1 END) AS '4xx',
+       count(CASE WHEN status_type = 5 THEN 1 END) AS '5xx'
+     FROM log
+     GROUP BY remote_addr
+     HAVING %(--having)s
+     ORDER BY count DESC
+     LIMIT %(--limit)s'''),
 ]
 
-DEFAULT_FIELDS = set(['status_type', 'bytes_sent'])
+DEFAULT_FIELDS = set(['status_type', 'bytes_sent', 'request_time', 'remote_addr'])
 
 
 # ======================
@@ -270,6 +291,7 @@ def process_log(lines, pattern, processor, arguments):
 
 def build_processor(arguments):
     fields = arguments['<var>']
+    # print(arguments)
     if arguments['print']:
         label = ', '.join(fields) + ':'
         selections = ', '.join(fields)
